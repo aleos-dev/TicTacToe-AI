@@ -6,109 +6,82 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 public class Field {
-    public enum Symbol {
-        EMPTY(" "), X("X"), O("O");
-
-        private final String value;
-
-        Symbol(String symbol) {
-            this.value = symbol;
-        }
-
-        @Override
-        public String toString() {
-            return value;
-        }
+    public enum Sign {
+        EMPTY, X, O
     }
 
     public static final int FIELD_SIZE = 9;
-    private final List<Symbol> field = new ArrayList<>(FIELD_SIZE);
-    private final AtomicInteger turnCounter = new AtomicInteger(0);
-    private final int dimension = (int) Math.sqrt(FIELD_SIZE);
+    public static final int DIMENSION = (int) Math.sqrt(FIELD_SIZE);
 
+    private final List<Sign> field;
+    private final AtomicInteger turnCounter;
 
 
     public Field() {
+        this.field = new ArrayList<>(FIELD_SIZE);
+        this.turnCounter = new AtomicInteger(0);
+        initField();
     }
 
-    public void initDefaultState(String initFieldState) {
-        String[] input = initFieldState.split("");
-        IntStream.range(0, input.length)
-                .forEach(i -> field.add(applySymbol(input[i])));
 
-    }
+    public void placeSign(int coordinateIndex) throws AlreadyOccupiedException {
 
-    private Symbol applySymbol(String symbol) {
-
-        if (symbol.equals("_")) return Symbol.EMPTY;
-
-        turnCounter.getAndIncrement();
-        if (symbol.equals("X")) return Symbol.X;
-        if (symbol.equals("O")) return Symbol.O;
-
-        throw new IllegalArgumentException();
-    }
-
-    private Symbol nextSymbol() {
-        return turnCounter.getAndIncrement() % 2 == 0
-                ? Symbol.X
-                : Symbol.O;
-    }
-
-    public void applyNextTurn(String inputCoordinate) throws WrongCoordinateException, AlreadyOccupiedException {
-        int fieldIndex = transformCoordinate(inputCoordinate);
-        field.set(fieldIndex, nextSymbol());
-    }
-
-    public int transformCoordinate(String inputCoordinate) throws NumberFormatException, WrongCoordinateException, AlreadyOccupiedException {
-
-        String[] input = inputCoordinate.split(" ");
-
-        int x;
-        int y;
-        int fieldIndex;
-        y = Integer.parseInt(input[0]) - 1;
-        x = Integer.parseInt(input[1]) - 1;
-        fieldIndex = x + y * dimension;
-
-        if (x < 0 || y < 0 || x >= dimension || y >= dimension) {
-            throw new WrongCoordinateException();
-        }
-
-        if (field.get(fieldIndex) != Symbol.EMPTY) {
+        if (isOccupied(coordinateIndex)) {
             throw new AlreadyOccupiedException();
         }
 
-        return fieldIndex;
+        field.set(coordinateIndex, getCurrentPlayerSign());
     }
 
+    public int[] getPossibleMoves() {
+        int possibleMoveCount = FIELD_SIZE - turnCount();
+        int[] possibleMoves = new int[possibleMoveCount];
+        AtomicInteger index = new AtomicInteger(0);
+        IntStream.range(0, FIELD_SIZE)
+                .filter(i -> field.get(i) == Sign.EMPTY)
+                .forEach(i -> possibleMoves[index.getAndIncrement()] = i);
 
-    // TODO: replace with streams
-    public void print() {
-        System.out.println("-".repeat(9));
+        return possibleMoves;
+    }
+
+    public void printField() {
+        String lineSeparator = "-".repeat(9);
+        System.out.println(lineSeparator);
+
         IntStream.range(0, field.size())
                 .forEach(i -> {
-                    if (i % dimension == 0) System.out.print("| ");
-                    System.out.print(field.get(i) + " ");
-                    if (i % dimension == dimension - 1) System.out.println("|");
+                    if (i % DIMENSION == 0) System.out.print("| ");
+                    Sign value = field.get(i);
+                    System.out.print(value == Sign.EMPTY ? "  " : value + " ");
+                    if (i % DIMENSION == DIMENSION - 1) System.out.println("|");
                 });
 
-        System.out.println("-".repeat(9));
+        System.out.println(lineSeparator);
     }
+
+    public boolean isOccupied(int index) {
+        return field.get(index) != Sign.EMPTY;
+    }
+
 
     public int turnCount() {
         return turnCounter.get();
     }
 
-    public Symbol get(int index) {
+    public Sign get(int index) {
         return field.get(index);
     }
 
-    public int getDimension() {
-        return dimension;
+
+    private void initField() {
+        IntStream.range(0, FIELD_SIZE)
+                .forEach(i -> field.add(Sign.EMPTY));
     }
 
-    public static class WrongCoordinateException extends Exception {
+    private Sign getCurrentPlayerSign() {
+        return turnCounter.getAndIncrement() % 2 == 0
+                ? Sign.X
+                : Sign.O;
     }
 
     public static class AlreadyOccupiedException extends Exception {

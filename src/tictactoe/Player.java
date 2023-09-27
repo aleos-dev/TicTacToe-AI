@@ -1,4 +1,7 @@
 package tictactoe;
 
-public record Player (String id) {
+public interface Player {
+    int makeMove();
+
+    void announceTurn();
 }
