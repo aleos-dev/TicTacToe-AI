@@ -1,30 +1,29 @@
 package tictactoe;
 
-public record User(String id) implements Player {
-
-    private static final String USER_TURN_ANNOUNCE = "Enter the coordinates: ";
+public record User(String id, GameUI gameUI) implements Player {
 
     @Override
     public int makeMove() {
-        while (true) {
+        int coordinateIndex = -1;
+        do {
             try {
-                String userInput = Main.getScanner().nextLine();
 
-                int coordinateIndex;
+                String userInput = gameUI.readUserInput();
                 coordinateIndex = parseUserInputToCoordinateIndex(userInput);
-                return coordinateIndex;
 
             } catch (NumberFormatException e) {
-                System.out.println("You should enter numbers!");
+                gameUI.printMessage(GameUI.ENTER_NUMBERS);
             } catch (WrongInputCoordinateException e) {
-                System.out.println("Coordinates should be from 1 to 3!");
+                gameUI.printMessage(GameUI.WRONG_COORDINATES);
             }
-        }
+        } while (coordinateIndex == -1);
+
+        return coordinateIndex;
     }
 
     @Override
     public void announceTurn() {
-        System.out.print(USER_TURN_ANNOUNCE);
+        gameUI.printMessage(GameUI.USER_TURN_ANNOUNCE);
     }
 
     public int parseUserInputToCoordinateIndex(String input) throws WrongInputCoordinateException {
@@ -42,7 +41,6 @@ public record User(String id) implements Player {
             throw new WrongInputCoordinateException();
         }
     }
-
 
     public static class WrongInputCoordinateException extends Exception {
     }

@@ -7,17 +7,12 @@ public class Main {
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
+
         Field field = new Field();
-        Player playerOne = new User("aleos");
-        Player playerTwo = new PlayerAI(field);
+        GameUI gameUI = new GameUI(field, scanner);
+        gameUI.startMenu();
 
-        var gc = new GameController(field, playerOne, playerTwo);
-        gc.startGame();
-
-    }
-
-    public static Scanner getScanner() {
-        return scanner;
+        scanner.close();
     }
 }
 

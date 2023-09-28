@@ -44,7 +44,7 @@ public class Field {
         return possibleMoves;
     }
 
-    public void printField() {
+    public void printBoard() {
         String lineSeparator = "-".repeat(9);
         System.out.println(lineSeparator);
 
