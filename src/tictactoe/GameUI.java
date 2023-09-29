@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 public class GameUI {
     private final Scanner scanner;
-    private final Field field;
+    private Field field;
 
     public static final String PROMPT_FOR_COMMAND = "Input command: ";
     public static final String USER_TURN_ANNOUNCE = "Enter the coordinates: ";
@@ -18,10 +18,9 @@ public class GameUI {
     public static final String WIN_MESSAGE = "%s wins";
 
     private final List<String> possibleCommands = List.of("start", "exit");
-    private final List<String> possiblePlayers = List.of("user", "easy");//, "medium", "hard");
+    private final List<String> possiblePlayers = List.of("user", "easy", "medium");//, "medium", "hard");
 
-    public GameUI(Field field, Scanner scanner) {
-        this.field = field;
+    public GameUI(Scanner scanner) {
         this.scanner = scanner;
     }
 
@@ -70,6 +69,7 @@ public class GameUI {
             if (commands[0].equals("start")) {
                 String playerOne = commands[1];
                 String playerTwo = commands[2];
+                field = new Field();
                 GameController gc = new GameController(field, playerOne, playerTwo, this);
 
                 gc.startGame();

@@ -9,11 +9,12 @@ public class Main {
     public static void main(String[] args) {
 
         Field field = new Field();
-        GameUI gameUI = new GameUI(field, scanner);
+        GameUI gameUI = new GameUI(scanner);
         gameUI.startMenu();
 
         scanner.close();
     }
+
 }
 
 

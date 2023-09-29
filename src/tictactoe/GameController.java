@@ -77,7 +77,8 @@ public class GameController {
     private Player createPlayer(String type) {
         return switch (type) {
             case "user" -> new User("user_Bob", gameUI);
-            case "easy" -> new PlayerAI(field, gameUI);
+            case "easy" -> new EasyAI(field, gameUI);
+            case "medium" -> new MediumAI(field, gameUI);
             default -> throw new IllegalArgumentException("Invalid player type");
         };
     }

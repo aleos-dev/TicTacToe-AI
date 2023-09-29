@@ -23,6 +23,15 @@ public class Field {
         initField();
     }
 
+    private Field(List<Sign> field, AtomicInteger turnCounter) {
+        this.field = new ArrayList<>(field);
+        this.turnCounter = new AtomicInteger(turnCounter.get());
+    }
+
+    public Field cloneField() {
+        return new Field(field, turnCounter);
+    }
+
 
     public void placeSign(int coordinateIndex) throws AlreadyOccupiedException {
 
@@ -31,6 +40,7 @@ public class Field {
         }
 
         field.set(coordinateIndex, getCurrentPlayerSign());
+        turnCounter.incrementAndGet();
     }
 
     public int[] getPossibleMoves() {
@@ -68,6 +78,10 @@ public class Field {
         return turnCounter.get();
     }
 
+    public int incrementTurnCount() {
+        return turnCounter.getAndIncrement();
+    }
+
     public Sign get(int index) {
         return field.get(index);
     }
@@ -78,8 +92,13 @@ public class Field {
                 .forEach(i -> field.add(Sign.EMPTY));
     }
 
-    private Sign getCurrentPlayerSign() {
-        return turnCounter.getAndIncrement() % 2 == 0
+    public Sign getCurrentPlayerSign() {
+        return turnCounter.get() % 2 == 0
+                ? Sign.X
+                : Sign.O;
+    }
+    public Sign getNextPlayerSign() {
+        return turnCounter.get() % 2 != 0
                 ? Sign.X
                 : Sign.O;
     }
