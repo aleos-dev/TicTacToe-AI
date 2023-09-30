@@ -79,6 +79,7 @@ public class GameController {
             case "user" -> new User("user_Bob", gameUI);
             case "easy" -> new EasyAI(field, gameUI);
             case "medium" -> new MediumAI(field, gameUI);
+            case "hard" -> new HardAI(field, gameUI);
             default -> throw new IllegalArgumentException("Invalid player type");
         };
     }

@@ -32,7 +32,6 @@ public class Field {
         return new Field(field, turnCounter);
     }
 
-
     public void placeSign(int coordinateIndex) throws AlreadyOccupiedException {
 
         if (isOccupied(coordinateIndex)) {
@@ -97,6 +96,7 @@ public class Field {
                 ? Sign.X
                 : Sign.O;
     }
+
     public Sign getNextPlayerSign() {
         return turnCounter.get() % 2 != 0
                 ? Sign.X

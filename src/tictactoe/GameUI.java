@@ -18,7 +18,7 @@ public class GameUI {
     public static final String WIN_MESSAGE = "%s wins";
 
     private final List<String> possibleCommands = List.of("start", "exit");
-    private final List<String> possiblePlayers = List.of("user", "easy", "medium");//, "medium", "hard");
+    private final List<String> possiblePlayers = List.of("user", "easy", "medium", "hard");
 
     public GameUI(Scanner scanner) {
         this.scanner = scanner;
