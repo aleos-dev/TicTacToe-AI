@@ -1,5 +1,6 @@
 package tictactoe;
 
+
 public class HardAI implements Player {
 
     private final Field field;
@@ -19,67 +20,107 @@ public class HardAI implements Player {
 
     }
 
+    /**
+     * Makes the best possible move for the AI, considering the current state of the game field.
+     * <p>
+     * This method utilizes the minimax algorithm with alpha-beta pruning to determine the best possible
+     * move for the AI. The best move is calculated based on the evaluation of possible future game states.
+     * </p>
+     *
+     * @return An integer representing the index on the game board where the AI should place its sign.
+     */
     @Override
     public int makeMove() {
         maxPlayerSign = field.getCurrentPlayerSign();
         minPlayerSign = field.getNextPlayerSign();
 
-        try {
+        int bestMove = -1;
+        int bestScore = Integer.MIN_VALUE;
 
-            int bestMove = -1;
-            int bestScore = Integer.MIN_VALUE;
-
-            int[] possibleMoves = field.getPossibleMoves();
-            int moveCount = possibleMoves.length;
-
-            for (int i = 0; i < moveCount; i++) {
-
-                Field modifiedField = field.cloneField();
-                modifiedField.placeSign(possibleMoves[i]);
-
-                int score = minimax(modifiedField, moveCount - 1, false);
-
-                if (bestScore < score) {
-                    bestScore = score;
-                    bestMove = possibleMoves[i];
-                }
+        int depth = Field.FIELD_SIZE - field.turnCount();
+        int alpha = Integer.MIN_VALUE;
+        int beta = Integer.MAX_VALUE;
+        for (int index = 0; index < Field.FIELD_SIZE; index++) {
+            if (field.isOccupied(index)) {
+                continue;
             }
 
-            return bestMove;
+            Field modifiedField = cloneAndPlaceSign(field, index);
 
-        } catch (Field.AlreadyOccupiedException e) {
-            throw new RuntimeException(e);
+            int score = miniMaxAlgorithm(modifiedField, depth - 1, alpha, beta, false);
+            if (bestScore < score) {
+                bestScore = score;
+                bestMove = index;
+            }
         }
+
+        return bestMove;
     }
 
-    private int minimax(Field field, int depth, boolean isMaximizingPlayer) throws Field.AlreadyOccupiedException {
+    /**
+     * Implementation of the minimax algorithm with alpha-beta pruning for game state evaluation.
+     * <p>
+     * This is a recursive function that simulates all possible game states to a certain depth to
+     * evaluate the best possible outcome for the AI, taking into consideration both maximizing and
+     * minimizing player turns.
+     * </p>
+     *
+     * @param field              The current game field object.
+     * @param depth              The depth of the game tree to explore.
+     * @param alpha              The best score that the maximizing player can achieve.
+     * @param beta               The best score that the minimizing player can achieve.
+     * @param isMaximizingPlayer Boolean flag to indicate if it's the maximizing player's turn.
+     * @return The evaluation score of the board after considering all possible game states up to the given depth.
+     */
+    private int miniMaxAlgorithm(Field field, int depth, int alpha, int beta, boolean isMaximizingPlayer) {
         int score = evaluateBoard(field);
         if (score != 0) {
-            return score - depth;
+            return score + depth;
         }
-        if (depth == 0) {
+        if (isLeafReached(depth)) {
             return 0;
         }
 
-        int[] possibleMoves = field.getPossibleMoves();
-        int moveCount = possibleMoves.length;
-
         int bestScore = isMaximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        for (int possibleMove : possibleMoves) {
 
-            Field modifiedField = field.cloneField();
-            modifiedField.placeSign(possibleMove);
+        for (int index = 0; index < Field.FIELD_SIZE; index++) {
+            if (field.isOccupied(index)) {
+                continue;
+            }
 
-            int currentScore = minimax(modifiedField, depth - 1, !isMaximizingPlayer);
+            Field modifiedField = cloneAndPlaceSign(field, index);
+
+            int currentScore = miniMaxAlgorithm(modifiedField, depth - 1, alpha, beta, !isMaximizingPlayer);
 
             if (isMaximizingPlayer) {
-                bestScore = Math.max(currentScore, bestScore);
+                bestScore = Math.max(bestScore, currentScore);
+                alpha = Math.max(alpha, currentScore);
             } else {
-                bestScore = Math.min(currentScore, bestScore);
+                bestScore = Math.min(bestScore, currentScore);
+                beta = Math.min(beta, currentScore);
+            }
+
+            if (isPruningNeeded(alpha, beta)) {
+                break;
             }
         }
 
         return bestScore;
+    }
+
+    private boolean isPruningNeeded(int alpha, int beta) {
+        return beta <= alpha;
+    }
+
+    private Field cloneAndPlaceSign(Field field, int index) {
+        Field modifiedField = field.cloneField();
+        modifiedField.placeSign(index);
+
+        return modifiedField;
+    }
+
+    private boolean isLeafReached(int depth) {
+        return depth == 0;
     }
 
     private int evaluateBoard(Field field) {
