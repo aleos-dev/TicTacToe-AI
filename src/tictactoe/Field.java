@@ -1,108 +1,96 @@
 package tictactoe;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Arrays;
 import java.util.stream.IntStream;
 
 public class Field {
-    public enum Sign {
+    public enum CellState {
         EMPTY, X, O
     }
 
     public static final int FIELD_SIZE = 9;
     public static final int DIMENSION = (int) Math.sqrt(FIELD_SIZE);
 
-    private final List<Sign> field;
-    private final AtomicInteger turnCounter;
+    private final CellState[] board;
+    private int turnCount;
 
 
     public Field() {
-        this.field = new ArrayList<>(FIELD_SIZE);
-        this.turnCounter = new AtomicInteger(0);
-        initField();
-    }
-
-    private Field(List<Sign> field, AtomicInteger turnCounter) {
-        this.field = new ArrayList<>(field);
-        this.turnCounter = new AtomicInteger(turnCounter.get());
+        board = new CellState[FIELD_SIZE];
+        initializeBoard();
+        turnCount = 0;
     }
 
     public Field cloneField() {
-        return new Field(field, turnCounter);
+        Field clone = new Field();
+
+        System.arraycopy(this.board, 0, clone.board, 0, FIELD_SIZE);
+        clone.turnCount = this.turnCount;
+
+        return clone;
     }
 
-    public void placeSign(int coordinateIndex) throws AlreadyOccupiedException {
-
-        if (isOccupied(coordinateIndex)) {
-            throw new AlreadyOccupiedException();
+    public void markCell(int coordinateIndex) {
+        if (isCellOccupied(coordinateIndex)) {
+            throw new IllegalArgumentException();
         }
 
-        field.set(coordinateIndex, getCurrentPlayerSign());
-        turnCounter.incrementAndGet();
+        board[coordinateIndex] = getCurrentPlayerSign();
+        turnCount++;
     }
 
     public int[] getPossibleMoves() {
-        int possibleMoveCount = FIELD_SIZE - turnCount();
-        int[] possibleMoves = new int[possibleMoveCount];
-        AtomicInteger index = new AtomicInteger(0);
-        IntStream.range(0, FIELD_SIZE)
-                .filter(i -> field.get(i) == Sign.EMPTY)
-                .forEach(i -> possibleMoves[index.getAndIncrement()] = i);
-
-        return possibleMoves;
+        return IntStream.range(0, FIELD_SIZE)
+                .filter(index -> board[index] == CellState.EMPTY)
+                .toArray();
     }
 
     public void printBoard() {
-        String lineSeparator = "-".repeat(9);
-        System.out.println(lineSeparator);
+        String horizontalDivider = "-".repeat(9);
+        System.out.println(horizontalDivider);
 
-        IntStream.range(0, field.size())
+        IntStream.range(0, board.length)
                 .forEach(i -> {
                     if (i % DIMENSION == 0) System.out.print("| ");
-                    Sign value = field.get(i);
-                    System.out.print(value == Sign.EMPTY ? "  " : value + " ");
+                    CellState value = board[i];
+                    System.out.print(value == CellState.EMPTY ? "  " : value + " ");
                     if (i % DIMENSION == DIMENSION - 1) System.out.println("|");
                 });
 
-        System.out.println(lineSeparator);
+        System.out.println(horizontalDivider);
     }
 
-    public boolean isOccupied(int index) {
-        return field.get(index) != Sign.EMPTY;
+    public boolean isCellOccupied(int index) {
+        return board[index] != CellState.EMPTY;
     }
 
 
     public int turnCount() {
-        return turnCounter.get();
+        return turnCount;
     }
 
-    public int incrementTurnCount() {
-        return turnCounter.getAndIncrement();
+    public void incrementTurnCount() {
+        turnCount++;
     }
 
-    public Sign get(int index) {
-        return field.get(index);
+    public CellState getCellState(int index) {
+        return board[index];
     }
 
 
-    private void initField() {
-        IntStream.range(0, FIELD_SIZE)
-                .forEach(i -> field.add(Sign.EMPTY));
+    private void initializeBoard() {
+        Arrays.fill(board, CellState.EMPTY);
     }
 
-    public Sign getCurrentPlayerSign() {
-        return turnCounter.get() % 2 == 0
-                ? Sign.X
-                : Sign.O;
+    public CellState getCurrentPlayerSign() {
+        return turnCount % 2 == 0
+                ? CellState.X
+                : CellState.O;
     }
 
-    public Sign getNextPlayerSign() {
-        return turnCounter.get() % 2 != 0
-                ? Sign.X
-                : Sign.O;
-    }
-
-    public static class AlreadyOccupiedException extends Exception {
+    public CellState getNextPlayerSign() {
+        return turnCount % 2 != 0
+                ? CellState.X
+                : CellState.O;
     }
 }
