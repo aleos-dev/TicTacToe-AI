@@ -5,8 +5,8 @@ public class HardAI implements Player {
 
     private final Field field;
     private final GameUI gameUI;
-    private Field.Sign maxPlayerSign;
-    private Field.Sign minPlayerSign;
+    private Field.CellState maximizingPlayerCellState;
+    private Field.CellState minimizingPlayerCellState;
 
     public HardAI(Field field, GameUI gameUI) {
         this.field = field;
@@ -31,8 +31,8 @@ public class HardAI implements Player {
      */
     @Override
     public int makeMove() {
-        maxPlayerSign = field.getCurrentPlayerSign();
-        minPlayerSign = field.getNextPlayerSign();
+        maximizingPlayerCellState = field.getCurrentPlayerSign();
+        minimizingPlayerCellState = field.getNextPlayerSign();
 
         int bestMove = -1;
         int bestScore = Integer.MIN_VALUE;
@@ -41,7 +41,7 @@ public class HardAI implements Player {
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
         for (int index = 0; index < Field.FIELD_SIZE; index++) {
-            if (field.isOccupied(index)) {
+            if (field.isCellOccupied(index)) {
                 continue;
             }
 
@@ -84,7 +84,7 @@ public class HardAI implements Player {
         int bestScore = isMaximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
         for (int index = 0; index < Field.FIELD_SIZE; index++) {
-            if (field.isOccupied(index)) {
+            if (field.isCellOccupied(index)) {
                 continue;
             }
 
@@ -103,6 +103,7 @@ public class HardAI implements Player {
             if (isPruningNeeded(alpha, beta)) {
                 break;
             }
+
         }
 
         return bestScore;
@@ -114,7 +115,7 @@ public class HardAI implements Player {
 
     private Field cloneAndPlaceSign(Field field, int index) {
         Field modifiedField = field.cloneField();
-        modifiedField.placeSign(index);
+        modifiedField.markCell(index);
 
         return modifiedField;
     }
@@ -124,10 +125,10 @@ public class HardAI implements Player {
     }
 
     private int evaluateBoard(Field field) {
-        if (WinChecker.isPlayerWin(field, maxPlayerSign)) {
+        if (WinChecker.isPlayerWin(field, maximizingPlayerCellState)) {
             return 10;
         }
-        if (WinChecker.isPlayerWin(field, minPlayerSign)) {
+        if (WinChecker.isPlayerWin(field, minimizingPlayerCellState)) {
             return -10;
         }
         return 0;

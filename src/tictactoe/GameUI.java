@@ -28,8 +28,8 @@ public class GameUI {
         System.out.print(message);
     }
 
-    public boolean announceGameOver(String message, Field.Sign sign) {
-        message = String.format(message, sign.toString());
+    public boolean announceGameOver(String message, Field.CellState cellState) {
+        message = String.format(message, cellState.toString());
         return announceGameOver(message);
     }
 

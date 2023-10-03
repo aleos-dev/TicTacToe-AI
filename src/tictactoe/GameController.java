@@ -8,11 +8,6 @@ public class GameController {
 
     private Player currentPlayer;
 
-    enum Mode {
-        NO_WIN, EASY, MEDIUM, HARD
-    }
-
-
     public GameController(Field field, String playerOne, String playerTwo, GameUI gameUI) {
         this.field = field;
         this.gameUI = gameUI;
@@ -40,15 +35,15 @@ public class GameController {
     private void handleTurn() {
         boolean trySuccess;
         do {
-            trySuccess = tryPlaceSign();
+            trySuccess = tryToMarkCell();
         } while (!trySuccess);
     }
 
-    private boolean tryPlaceSign() {
+    private boolean tryToMarkCell() {
         try {
-            field.placeSign(currentPlayer.makeMove());
+            field.markCell(currentPlayer.makeMove());
             return true;
-        } catch (Field.AlreadyOccupiedException e) {
+        } catch (IllegalArgumentException e) {
             gameUI.printMessage(GameUI.CELL_OCCUPIED);
             return false;
         }
@@ -59,14 +54,16 @@ public class GameController {
     }
 
     private boolean checkGameOverConditions(String drawMessage, String winMessage) {
-        if (isPlayerWin(Field.Sign.O)) return gameUI.announceGameOver(winMessage, Field.Sign.O);
-        if (isPlayerWin(Field.Sign.X)) return gameUI.announceGameOver(winMessage, Field.Sign.X);
+        if (isPlayerWin(Field.CellState.O))
+            return gameUI.announceGameOver(winMessage, Field.CellState.O);
+        if (isPlayerWin(Field.CellState.X))
+            return gameUI.announceGameOver(winMessage, Field.CellState.X);
         if (field.turnCount() == Field.FIELD_SIZE) return gameUI.announceGameOver(drawMessage);
         return false;
     }
 
-    private boolean isPlayerWin(Field.Sign sign) {
-        return WinChecker.isPlayerWin(field, sign);
+    private boolean isPlayerWin(Field.CellState cellState) {
+        return WinChecker.isPlayerWin(field, cellState);
     }
 
     private void initPlayers(String playerOne, String playerTwo) {
