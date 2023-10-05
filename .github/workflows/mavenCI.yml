@@ -64,5 +64,5 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ secrets.TICTACTOE }}
           artifacts: "myArtifacts/TicTacToe-*.jar"
